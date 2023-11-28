@@ -1,0 +1,35 @@
+﻿@page "/Receipts"
+
+@inject HttpClient TestingRestAPI
+
+<h3>API Response:</h3>
+<p>@apiResponse</p>
+
+
+@code {
+    
+
+    private string? apiResponse;
+
+    protected override async Task OnInitializedAsync()
+    {
+        try
+        {
+            var response = await TestingRestAPI.GetStringAsync("https://localhost:7029/api/Receipt");
+            apiResponse = response;
+        }
+        catch (HttpRequestException ex)
+        {
+            Console.WriteLine($"HttpRequestException: {ex.Message}");
+
+            if (ex.InnerException != null)
+            {
+                Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Exception: {ex.Message}");
+        }
+    }
+}
