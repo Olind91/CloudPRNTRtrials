@@ -71,13 +71,20 @@ public class CloudPRNTController : ControllerBase
     {
         if (_printJobService.TryGetPrintJob(jobId, out var jobData))
         {
-            // Print the job
-            // Add logic here to interact with the CloudPRNT SDK to send the print job to the printer
+            // Print the job using CloudPRNT-SDK
+            var printResult = StarMicronicsCloudPRNT.Print(jobData.Content);  // Replace with actual SDK method
 
-            // Remove the job from the service after printing (optional)
-            _printJobService.RemovePrintJob(jobId);
-
-            return Ok("Job printed successfully");
+            if (printResult.Success)
+            {
+                // Remove the job from the service after successful printing
+                _printJobService.RemovePrintJob(jobId);
+                return Ok("Job printed successfully");
+            }
+            else
+            {
+                // Handle printing failure
+                return StatusCode(500, "Failed to print job");
+            }
         }
         else
         {
