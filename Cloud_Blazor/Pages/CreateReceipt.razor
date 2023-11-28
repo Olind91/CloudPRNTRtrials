@@ -1,0 +1,172 @@
+﻿<!-- CreateReceipt.razor -->
+@page "/createReceipt"
+
+
+<section class="bg-gray-100 min-h-screen py-8">
+    <div class="max-w-4xl mx-auto bg-white p-8 shadow-md rounded-md md:flex md:flex-wrap">
+
+        <CompanyInfo/>
+
+        <!-- Products -->
+        <div class="col-span-2">
+
+            <!-- Product List -->
+            <div class="col-span-2">
+                @if (products.Any())
+                {
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                        <div>
+                            <label class="text-gray-700">Artikelnummer</label>
+                        </div>
+                        <div>
+                            <label class="text-gray-700">Produktbeskrivning</label>
+                        </div>
+                        <div>
+                            <label class="text-gray-700">Antal</label>
+                        </div>
+                        <div>
+                            <label class="text-gray-700">Pris</label>
+                        </div>
+                    </div>
+                }
+
+                <!-- Product List -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-4">
+                    @foreach (var product in products)
+                    {
+                        <div>
+                            <input class="border p-2 w-full" type="text" @bind="product.Artikelnummer" />
+                        </div>
+                        <div>
+                            <input class="border p-2 w-full" type="text" @bind="product.Produktbeskrivning" />
+                        </div>
+                        <div>
+                            <input class="border p-2 w-full" type="number" @bind="product.Antal" />
+                        </div>
+                        <div>
+                            <input class="border p-2 w-full" type="text" @bind="product.Pris" @onblur="UpdateTotalAmount" />
+                        </div>
+                    }
+                </div>
+
+                <!-- Add Button -->
+                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="AddProduct">
+                    Add Product
+                </button>
+            </div>
+
+
+        </div>        
+        <!-- Money -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
+            <div class="my-4">
+                <label class="text-gray-700">Totalbelopp</label>
+                <input class="border p-2 w-full" type="text" @bind="totalAmount" readonly /> SEK
+            </div>
+            <div class="my-4">
+                <label class="text-gray-700">Moms</label>
+                <input class="border p-2 w-full" type="text" @bind="tax" readonly /> SEK
+            </div>
+        </div>
+
+        <!-- Betalsätt -->
+        <h2 class="text-2xl font-semibold mb-4 w-full">Betalsätt</h2>
+        <div class="grid grid-cols-2 gap-4 mb-4 w-full">
+            @foreach (var paymentMethod in paymentMethods)
+            {
+                <div class="flex items-center">
+                    <input type="checkbox" id="@paymentMethod.Id" class="mr-2" @bind="paymentMethod.Selected" />
+                    <label for="@paymentMethod.Id">@paymentMethod.Name</label>
+                </div>
+            }
+        </div>
+
+        <!-- Footer -->
+        <h2 class="text-2xl font-semibold mb-4 w-full">Footer</h2>
+        <div class="mb-4 w-full">
+            <label class="text-gray-700">Optional styling area for text and/or images</label>
+            <textarea class="border p-2 w-full" @bind="footerText"></textarea>
+        </div>
+
+        <!-- Receipt Number -->
+        <div class="mb-4 w-full">
+            <label class="text-gray-700">Receipt Number</label>
+            <span class="border p-2 w-full">@receiptNumber</span>
+        </div>
+
+        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="SubmitForm">
+            Submit
+        </button>
+    </div>
+</section>
+
+@code {
+    private string totalAmount;
+    private string tax;
+    private string footerText;
+    private int receiptNumber = 1;
+
+
+    // List of Products
+    List<ProductModel> products = new List<ProductModel>();
+
+    // List of Payment Methods
+    List<PaymentMethodModel> paymentMethods = new List<PaymentMethodModel>
+    {
+        new PaymentMethodModel { Id = 1, Name = "Kort", Selected = false },
+        new PaymentMethodModel { Id = 2, Name = "Faktura", Selected = false },
+        new PaymentMethodModel { Id = 3, Name = "Kontant", Selected = false },
+        new PaymentMethodModel { Id = 4, Name = "Presentkort", Selected = false },
+    };
+
+    // Method to add a new product to the list
+    private void AddProduct()
+    {
+        products.Add(new ProductModel());
+        CalculateTotalAmount();
+    }
+
+    // Method to remove a product from the list
+    private void RemoveProduct(ProductModel product)
+    {
+        products.Remove(product);
+        CalculateTotalAmount();
+    }
+
+    // Method to update the total amount when typing in the price
+    private void UpdateTotalAmount(FocusEventArgs e)
+    {
+        CalculateTotalAmount();
+    }
+
+    // Method to calculate the total amount
+    private void CalculateTotalAmount()
+    {
+        decimal total = 0;
+
+        foreach (var product in products)
+        {
+            total += product.Pris * product.Antal;
+        }
+
+        totalAmount = total.ToString("C");
+        tax = (total * 0.25m).ToString("C");
+    }
+
+    // Method to submit the form
+    private async Task SubmitForm()
+    {
+        // Additional logic for form submission
+        // ...
+
+        // Reset form-related data
+        tax = string.Empty;
+        totalAmount = string.Empty;
+        receiptNumber++;
+        products.Clear();
+        foreach (var paymentMethod in paymentMethods)
+        {
+            paymentMethod.Selected = false;
+        }
+    }
+}
