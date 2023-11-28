@@ -12,6 +12,7 @@ namespace Cloud_API.Contexts
 
         public DbSet<Receipt> Receipts { get; set; } = null!;
 
+        
         public DbSet<PrintJob> PrintJobs { get; set; } = null!;
     }
 }

@@ -1,14 +1,30 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Cloud_API.Interfaces;
+using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using StarMicronics.CloudPrnt;
 using StarMicronics.CloudPrnt.CpMessage;
+using System;
+using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 [ApiController]
 [Route("api/cloudprnt")]
 public class CloudPRNTController : ControllerBase
 {
-    private static readonly Dictionary<string, byte[]> JobDatabase = new Dictionary<string, byte[]>();
+    private readonly IPrintJobService _printJobService;
+
+    public CloudPRNTController(IPrintJobService printJobService)
+    {
+        _printJobService = printJobService;
+    }
+
+    [HttpPost("job")]
+    public async Task<IActionResult> CreatePrintJob([FromBody] string content)
+    {
+        var printJob = await _printJobService.CreatePrintJobAsync(content);
+        return Ok(printJob.Id); // Return the print job ID to the client
+    }
 
     [HttpPost("poll")]
     public IActionResult HandleCloudPRNTPoll([FromBody] string request)
@@ -20,7 +36,7 @@ public class CloudPRNTController : ControllerBase
         PollResponse pollResponse = new PollResponse();
 
         // Example logic: Check if a job is available in your database
-        if (IsJobAvailable(pollRequest.printerMAC))
+        if (_printJobService.IsJobAvailable(pollRequest.printerMAC))
         {
             pollResponse.jobReady = true;
             pollResponse.mediaTypes = new List<string>(Document.GetOutputTypesFromType("text/vnd.star.markup"));
@@ -35,7 +51,7 @@ public class CloudPRNTController : ControllerBase
     }
 
     [HttpGet("job")]
-    public IActionResult GetPrintJob([FromQuery] string type)
+    public async Task<IActionResult> GetPrintJob([FromQuery] string type)
     {
         // Example: Create a simple markup language job
         StringBuilder job = new StringBuilder();
@@ -45,25 +61,22 @@ public class CloudPRNTController : ControllerBase
         byte[] jobData = Encoding.UTF8.GetBytes(job.ToString());
 
         // Save the job in the database
-        var jobId = Guid.NewGuid().ToString();
-        JobDatabase[jobId] = jobData;
+        var jobId = await _printJobService.CreatePrintJobAsync(Encoding.UTF8.GetString(jobData));
 
         // Return the job ID to the client
         return Ok(jobId);
     }
-    
+
     [HttpPost("print")]
     public IActionResult PrintJob([FromBody] string jobId)
     {
-       
-
-        if (JobDatabase.TryGetValue(jobId, out var jobData))
+        if (_printJobService.TryGetPrintJob(jobId, out var jobData))
         {
             // Print the job
             // Add logic here to interact with the CloudPRNT SDK to send the print job to the printer
 
             // Remove the job from the database after printing (optional)
-            JobDatabase.Remove(jobId);
+            _printJobService.RemovePrintJob(jobId);
 
             return Ok("Job printed successfully");
         }
@@ -71,12 +84,5 @@ public class CloudPRNTController : ControllerBase
         {
             return NotFound("Job not found");
         }
-    }
-
-    private bool IsJobAvailable(string printerMAC)
-    {
-        // Example logic: Check if a job is available in your database for the given printerMAC
-        // You might want to replace this with your actual logic for checking job availability
-        return true;
     }
 }
