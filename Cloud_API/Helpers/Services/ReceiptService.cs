@@ -38,8 +38,18 @@ namespace Cloud_API.Helpers.Services
 
             return singleReceipt;
         }
+        public async Task<bool> DeleteReceiptAsync(int id)
+        {
+            var receiptToDelete = await context.Receipts.FindAsync(id);
+            if (receiptToDelete == null)
+                return false;
 
-        
+            context.Receipts.Remove(receiptToDelete);
+            await context.SaveChangesAsync();
+
+            return true;
+        }
+
     }
 }
 
