@@ -26,9 +26,11 @@ builder.Services.AddDbContext<PrintContext>(x => x.UseSqlServer(builder.Configur
 
 // Repos
 builder.Services.AddScoped<ReceiptRepository>();
+builder.Services.AddScoped<PrintJobRepository>();
 
 // Services
 builder.Services.AddScoped<IReceiptService, ReceiptService>();
+builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 
 var app = builder.Build();
 
