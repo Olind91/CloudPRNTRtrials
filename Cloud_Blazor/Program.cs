@@ -1,3 +1,5 @@
+using Cloud_Blazor.Helpers.Interfaces;
+using Cloud_Blazor.Helpers.Services;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 
@@ -10,6 +12,9 @@ builder.Services.AddHttpClient("TestingRestAPI", client =>
 {
     client.BaseAddress = new Uri("https://localhost:7029/");
 });
+
+builder.Services.AddScoped<IReceiptService, ReceiptService>();
+
 var app = builder.Build();
 
 if (!app.Environment.IsDevelopment())

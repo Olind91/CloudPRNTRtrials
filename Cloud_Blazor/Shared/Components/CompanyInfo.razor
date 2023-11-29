@@ -1,4 +1,4 @@
-﻿<!-- Företagsinformation -->
+﻿<!-- CompanyInfo.razor -->
 
 <div>
     <h2 class="text-2xl font-semibold mb-4 w-full">Företagsinformation</h2>
@@ -10,7 +10,7 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Företagsnamn</label>
-            <select class="border p-2 w-full" @bind="selectedCompanyName" @oninput="HandleCompanyNameChange">
+            <select class="border p-2 w-full" @bind="SelectedCompanyName" @oninput="HandleCompanyNameChange">
                 <option value="Default">---</option>
                 <option value="Valei">Valei AB</option>
                 <!-- Lägg till fler options om du vill -->
@@ -18,7 +18,7 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Adress</label>
-            <select class="border p-2 w-full" @bind="selectedAddress">
+            <select class="border p-2 w-full" @bind="SelectedAddress">
                 <option value="Default">---</option>
                 <option value="Olaigatan 17 A, 703 61 Örebro">Olaigatan 17 A, 703 61 Örebro</option>
                 <!-- Lägg till fler options om du vill -->
@@ -26,7 +26,7 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Org-nr</label>
-            <select class="border p-2 w-full" @bind="selectedOrgNr">
+            <select class="border p-2 w-full" @bind="SelectedOrgNr">
                 <option value="Default">---</option>
                 <option value="559037-2164">559037-2164</option>
                 <!-- Lägg till fler options om du vill -->
@@ -34,41 +34,39 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Telefon</label>
-            <select class="border p-2 w-full" @bind="selectedPhoneNumber">
+            <select class="border p-2 w-full" @bind="SelectedPhoneNumber">
                 <option value="Default">---</option>
                 <option value="019 300 100">019 300 100</option>
             </select>
         </div>
     </div>
-
-</div>
-<div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
-    <div class="mb-4">
-        <label class="text-gray-700">Kassa</label>
-        <select class="border p-2 w-full">
-            <option value="kassa1">Kassa 1</option>
-            <option value="kassa2">Kassa 2</option>
-        </select>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
+        <div class="mb-4">
+            <label class="text-gray-700">Kassa</label>
+            <select class="border p-2 w-full">
+                <option value="kassa1">Kassa 1</option>
+                <option value="kassa2">Kassa 2</option>
+            </select>
+        </div>
+        <div class="mb-4">
+            <label class="text-gray-700">Säljare</label>
+            <select class="border p-2 w-full" @bind="SelectedSeller">
+                <option value="defaultseller">---</option>
+                <option value="seller1">Oskar</option>
+                <option value="seller2">Linus</option>
+                <option value="seller3">Erick</option>
+            </select>
+        </div>
+        <h2 class="text-2xl font-semibold mb-4 w-full">Kvittorader</h2>
     </div>
-    <div class="mb-4">
-        <label class="text-gray-700">Säljare</label>
-        <select class="border p-2 w-full">
-            <option value="defaultseller">---</option>
-            <option value="seller1">Oskar</option>
-            <option value="seller2">Linus</option>
-            <option value="seller3">Erick</option>
-        </select>
-    </div>
-    <h2 class="text-2xl font-semibold mb-4 w-full">Kvittorader</h2>
 </div>
-
-
 
 @code {
-    private string selectedCompanyName;
-    private string selectedAddress;
-    private string selectedOrgNr;
-    private string selectedPhoneNumber;
+    [Parameter] public string SelectedCompanyName { get; set; }
+    [Parameter] public string SelectedAddress { get; set; }
+    [Parameter] public string SelectedOrgNr { get; set; }
+    [Parameter] public string SelectedPhoneNumber { get; set; }
+    [Parameter] public string SelectedSeller { get; set; }
 
     private void HandleCompanyNameChange(ChangeEventArgs e)
     {
@@ -76,18 +74,17 @@
         if (e.Value?.ToString() == "Valei")
         {
             // Om Valei AB är selected fyll i följande info
-            selectedAddress = "Olaigatan 17 A, 703 61 Örebro";
-            selectedOrgNr = "559037-2164";
-            selectedPhoneNumber = "019 300 100";
+            SelectedAddress = "Olaigatan 17 A, 703 61 Örebro";
+            SelectedOrgNr = "559037-2164";
+            SelectedPhoneNumber = "019 300 100";
 
             StateHasChanged();
         }
         else
         {
-            selectedAddress = string.Empty;
-            selectedOrgNr = string.Empty;
-            selectedPhoneNumber = string.Empty;
+            SelectedAddress = string.Empty;
+            SelectedOrgNr = string.Empty;
+            SelectedPhoneNumber = string.Empty;
         }
     }
 }
-

@@ -1,22 +1,23 @@
 ﻿@page "/Receipts"
+@inject IReceiptService ReceiptService
+@inject NavigationManager NavigationManager
 
-@inject HttpClient TestingRestAPI
-
-<section class="bg-gray-100 min-h-screen py-8">
+<section class="py-8">
     <div class="max-w-4xl mx-auto">
 
-        <h2 class="text-2xl font-semibold mb-4">Receipts</h2>
+        <h1 class="text-4xl text-white text-center font-extrabold drop-shadow-md mb-16">Receipts</h1>
 
-        @if (receipts != null && receipts.Any())
+        @if (ReceiptService.Receipts != null && ReceiptService.Receipts.Any())
         {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach (var receipt in receipts)
+                @foreach (var receipt in ReceiptService.Receipts)
                 {
                     <div class="bg-white p-4 shadow-md rounded-md">
                         <h3 class="text-lg font-semibold mb-2">Receipt @receipt.Id</h3>
                         <p class="text-gray-700">Name: @receipt.Name</p>
                         <p class="text-gray-700">Company: @receipt.Company</p>
-                        <button class="bg-red-500 text-white font-bold py-1 px-2 rounded mt-2" @onclick="() => DeleteReceipt(receipt.Id)">Delete</button>
+                        <button class="bg-red-500 text-white font-bold py-1 px-2 rounded mt-2" @onclick="() => DeleteReceipt(receipt)">Delete</button>
+                        <button class="bg-blue-500 text-white font-bold py-1 px-2 rounded mt-2" @onclick="() => ViewReceipt(receipt.Id)">View</button>
                     </div>
                 }
             </div>
@@ -34,56 +35,17 @@
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadReceipts();
+        await ReceiptService.GetReceipts();
     }
 
-    private async Task LoadReceipts()
+    async Task DeleteReceipt(Receipt receipt)
     {
-        try
-        {
-            // Use GetFromJsonAsync to deserialize JSON into objects
-            receipts = await TestingRestAPI.GetFromJsonAsync<List<Receipt>>("https://localhost:7029/api/Receipt");
-
-            if (receipts == null || !receipts.Any())
-            {
-                receipts = null;
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Console.WriteLine($"HttpRequestException: {ex.Message}");
-
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-        }
+        await ReceiptService.DeleteReceipt(receipt.Id);
     }
 
-    private async Task DeleteReceipt(int receiptId)
+    async Task ViewReceipt(int id)
     {
-        try
-        {
-            // Make a DELETE request to the API to delete the receipt
-            var response = await TestingRestAPI.DeleteAsync($"https://localhost:7029/api/Receipt/{receiptId}");
-            if (response.IsSuccessStatusCode)
-            {
-                // Reload the receipts after deletion
-                await LoadReceipts();
-            }
-            else
-            {
-                // Handle error if needed
-                Console.WriteLine($"Error deleting receipt. Status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-        }
+        NavigationManager.NavigateTo($"/receipts/{id}");
     }
+
 }

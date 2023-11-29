@@ -1,11 +1,16 @@
 ﻿<!-- CreateReceipt.razor -->
 @page "/createReceipt"
+@inject IReceiptService ReceiptService
+@inject NavigationManager NavigationManager
 
-
-<section class="bg-gray-100 min-h-screen py-8">
+<section class="py-8">
     <div class="max-w-4xl mx-auto bg-white p-8 shadow-md rounded-md md:flex md:flex-wrap">
 
-        <CompanyInfo/>
+        <CompanyInfo SelectedCompanyName="@selectedCompanyName"
+                     SelectedAddress="@selectedAddress"
+                     SelectedOrgNr="@selectedOrgNr"
+                     SelectedPhoneNumber="@selectedPhoneNumber"
+                     SelectedSeller="@selectedSeller" />
 
         <!-- Products -->
         <div class="col-span-2">
@@ -47,13 +52,13 @@
                             <input class="border p-2 w-full" type="text" @bind="product.Pris" @onblur="UpdateTotalAmount" />
                         </div>
                     }
+                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="AddProduct">
+                        Add Product
+                    </button>
                 </div>
 
-                <!-- Add Button -->
-                <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="AddProduct">
-                    Add Product
-                </button>
             </div>
+            <!-- Add Button -->
 
 
         </div>        
@@ -106,6 +111,11 @@
     private string footerText;
     private int receiptNumber = 1;
 
+    private string selectedCompanyName;
+    private string selectedAddress;
+    private string selectedOrgNr;
+    private string selectedPhoneNumber;
+    private string selectedSeller;
 
     // List of Products
     List<ProductModel> products = new List<ProductModel>();
@@ -156,17 +166,19 @@
     // Method to submit the form
     private async Task SubmitForm()
     {
-        // Additional logic for form submission
-        // ...
 
-        // Reset form-related data
-        tax = string.Empty;
-        totalAmount = string.Empty;
-        receiptNumber++;
-        products.Clear();
-        foreach (var paymentMethod in paymentMethods)
+        // Create a receipt object with the selected information
+        Receipt receipt = new Receipt
         {
-            paymentMethod.Selected = false;
-        }
+            Name = selectedSeller,
+            Company = selectedCompanyName,
+            // Add other properties as needed
+        };
+
+        // Call the CreateReceipt method from the service
+        await ReceiptService.CreateReceipt(receipt);
+
+        // Navigate to the created receipt
+        NavigationManager.NavigateTo($"/receipts/{receipt.Id}");
     }
 }

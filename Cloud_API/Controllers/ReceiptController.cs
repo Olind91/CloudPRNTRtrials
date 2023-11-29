@@ -37,11 +37,26 @@ namespace Cloud_API.Controllers
         }
 
         [HttpPost]
-        public async Task<ActionResult<List<Receipt>>> CreateReceiptAsync(Receipt receipts)
+        public async Task<ActionResult<Receipt>> CreateReceiptAsync(Receipt receipts)
         {
             var result = await receiptService.CreateReceiptAsync(receipts);
+            return CreatedAtAction(nameof(GetSingleReceiptAsync), new { id = result.Id }, result);
+        }
+
+
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteReceiptAsync(int id)
+        {
+            var result = await receiptService.DeleteReceiptAsync(id);
+
+            if (result == null)
+            {
+                return NotFound("Couldn't find ID");
+            }
+
             return Ok(result);
         }
+
 
 
     }
