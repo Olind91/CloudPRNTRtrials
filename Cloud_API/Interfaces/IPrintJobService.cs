@@ -8,7 +8,7 @@ namespace Cloud_API.Interfaces
         Task<IEnumerable<PrintJob>> GetRecentPrintJobsAsync(int count);
         bool IsJobAvailable(string printerMAC);
         void RemovePrintJob(string jobId);
-        bool TryGetPrintJob(string jobId, out object jobData);
-        // Add other methods as needed
+        bool TryGetPrintJob(string jobId, out PrintJob jobData);
+        
     }
 }
