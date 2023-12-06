@@ -43,6 +43,16 @@ namespace Cloud_API.Helpers.Repositories
             return false;
         }
 
-    
+        public async Task<PrintJob> GetFirstPendingJobForPrinter(string printerMAC)
+        {
+            return await _context.PrintJobs
+                .FirstOrDefaultAsync(job => job.PrinterMAC == printerMAC && job.Status == PrintJobStatus.Pending);
+        }
+
+        public async Task<PrintJob> GetPrintJobByIdAsync(int jobId)
+        {
+            return await _context.PrintJobs.FindAsync(jobId);
+        }
+
     }
 }

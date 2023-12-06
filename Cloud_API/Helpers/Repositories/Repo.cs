@@ -61,5 +61,14 @@ namespace Cloud_API.Helpers.Repositories
             _context.SaveChanges();
         }
         #endregion
+
+        #region Update
+        public virtual async Task<TEntity> UpdateAsync(TEntity entity)
+        {
+            _context.Set<TEntity>().Update(entity);
+            await _context.SaveChangesAsync();
+            return entity;
+        }
+        #endregion
     }
 }
