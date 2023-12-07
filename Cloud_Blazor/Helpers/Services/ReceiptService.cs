@@ -26,17 +26,37 @@ namespace Cloud_Blazor.Helpers.Services
 
         public async Task CreateReceipt(Receipt receipt)
         {
-            var result = await _http.PostAsJsonAsync("https://localhost:7029/api/Receipt", receipt);
+            var response = await _http.PostAsJsonAsync("https://localhost:7029/api/Receipt", receipt);
+            Console.WriteLine($"Response Status Code: {response.StatusCode}");
+            Console.WriteLine($"Response Headers: {response.Headers}");
+            Console.WriteLine($"Response Content: {await response.Content.ReadAsStringAsync()}");
 
-            if (result.IsSuccessStatusCode)
+            if (response.IsSuccessStatusCode)
             {
-                var createdReceipt = await result.Content.ReadFromJsonAsync<Receipt>();
-                _navigationManager.NavigateTo($"/receipts/{createdReceipt.Id}");
+                var createdReceipt = await response.Content.ReadFromJsonAsync<Receipt>();
+
+                if (createdReceipt != null && createdReceipt.Id > 0)
+                {
+                    // Update the local Receipts list with the created receipt
+                    Receipts.Add(createdReceipt);
+
+                    // Navigate to the created receipt
+                    _navigationManager.NavigateTo($"/receipts/{createdReceipt.Id}");
+                }
+                else
+                {
+                    // Handle the case where the receipt creation failed or the ID is not available
+                    Console.WriteLine("Error: Receipt creation failed or ID not available");
+                }
             }
             else
             {
+                // Handle error if necessary
+                Console.WriteLine($"Error: {response.StatusCode} - {response.ReasonPhrase}");
             }
         }
+
+
 
         public async Task DeleteReceipt(int id)
         {

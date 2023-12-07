@@ -25,6 +25,35 @@ namespace Cloud_API.Controllers
         }
 
 
+
+
+        [HttpPost]
+        public async Task<ActionResult<Receipt>> CreateReceiptAsync(Receipt receipts)
+        {
+            try
+            {
+                // Create the receipt
+                var createdReceipt = await receiptService.CreateReceiptAsync(receipts);
+
+                if (createdReceipt == null || createdReceipt.Id <= 0)
+                {
+                    // Handle the case where the ID is not properly assigned
+                    Console.WriteLine("Error: Receipt ID not properly assigned.");
+                    return BadRequest("Error: Receipt ID not properly assigned.");
+                }
+
+                // Return the created receipt directly
+                return Ok(createdReceipt);
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine($"Exception during receipt creation: {ex.Message}");
+                return StatusCode(500, "Internal Server Error");
+            }
+        }
+
+
         [HttpGet("{id}")]
 
         public async Task<ActionResult<Receipt>> GetSingleReceiptAsync(int id)
@@ -35,14 +64,6 @@ namespace Cloud_API.Controllers
 
             return Ok(result);
         }
-
-        [HttpPost]
-        public async Task<ActionResult<Receipt>> CreateReceiptAsync(Receipt receipts)
-        {
-            var result = await receiptService.CreateReceiptAsync(receipts);
-            return CreatedAtAction(nameof(GetSingleReceiptAsync), new { id = result.Id }, result);
-        }
-
 
         [HttpDelete("{id}")]
         public async Task<ActionResult> DeleteReceiptAsync(int id)

@@ -1,5 +1,4 @@
 ﻿<!-- CompanyInfo.razor -->
-
 <div>
     <h2 class="text-2xl font-semibold mb-4 w-full">Företagsinformation</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
@@ -10,11 +9,12 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Företagsnamn</label>
-            <select class="border p-2 w-full" @bind="SelectedCompanyName" @oninput="HandleCompanyNameChange">
+            <select class="border p-2 w-full" @bind-value="@SelectedCompanyName" @onchange="HandleCompanyNameChange" @bind-value:event="oninput">
                 <option value="Default">---</option>
-                <option value="Valei">Valei AB</option>
-                <!-- Lägg till fler options om du vill -->
+                <option value="Valei AB">Valei AB</option>
+                <!-- Add more options if needed -->
             </select>
+
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Adress</label>
@@ -50,30 +50,49 @@
         </div>
         <div class="mb-4">
             <label class="text-gray-700">Säljare</label>
-            <select class="border p-2 w-full" @bind="SelectedSeller">
+            <select class="border p-2 w-full" @bind="@SelectedSeller" @onchange="HandleSellerChange" @bind:event="oninput">
                 <option value="defaultseller">---</option>
-                <option value="seller1">Oskar</option>
-                <option value="seller2">Linus</option>
-                <option value="seller3">Erick</option>
+                <option value="Oskar">Oskar</option>
+                <option value="Linus">Linus</option>
+                <option value="Erick">Erick</option>
             </select>
         </div>
         <h2 class="text-2xl font-semibold mb-4 w-full">Kvittorader</h2>
     </div>
 </div>
 
+<p>@SelectedCompanyName @SelectedSeller</p>
+
 @code {
-    [Parameter] public string SelectedCompanyName { get; set; }
-    [Parameter] public string SelectedAddress { get; set; }
-    [Parameter] public string SelectedOrgNr { get; set; }
-    [Parameter] public string SelectedPhoneNumber { get; set; }
-    [Parameter] public string SelectedSeller { get; set; }
+    [Parameter] 
+    public string SelectedCompanyName { get; set; }
+
+    [Parameter] 
+    public string SelectedSeller { get; set; }
+
+    [Parameter] 
+    public string SelectedAddress { get; set; }
+
+    [Parameter]
+    public string SelectedOrgNr { get; set; }
+
+    [Parameter] 
+    public string SelectedPhoneNumber { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectedCompanyNameChanged { get; set; }
+
+    [Parameter]
+    public EventCallback<string> SelectedSellerChanged { get; set; }
+
 
     private void HandleCompanyNameChange(ChangeEventArgs e)
     {
-        // Check if the selected company name is "Valei AB"
-        if (e.Value?.ToString() == "Valei")
+        SelectedCompanyName = e.Value?.ToString();
+        Console.WriteLine($"Selected Company Name: {SelectedCompanyName}");
+
+        if (SelectedCompanyName == "Valei AB")
         {
-            // Om Valei AB är selected fyll i följande info
             SelectedAddress = "Olaigatan 17 A, 703 61 Örebro";
             SelectedOrgNr = "559037-2164";
             SelectedPhoneNumber = "019 300 100";
@@ -85,6 +104,14 @@
             SelectedAddress = string.Empty;
             SelectedOrgNr = string.Empty;
             SelectedPhoneNumber = string.Empty;
+            StateHasChanged();
         }
+    }
+
+    private void HandleSellerChange(ChangeEventArgs e)
+    {
+        SelectedSeller = e.Value?.ToString();
+        Console.WriteLine($"Selected Seller: {SelectedSeller}");
+        StateHasChanged();
     }
 }

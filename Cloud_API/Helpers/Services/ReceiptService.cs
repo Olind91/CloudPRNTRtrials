@@ -14,7 +14,7 @@ namespace Cloud_API.Helpers.Services
             context = _context;
         }
 
-        public async Task<Receipt> CreateReceiptAsync(Receipt receipt)
+        public async Task<Receipt?> CreateReceiptAsync(Receipt receipt)
         {
             context.Receipts.Add(receipt);
             await context.SaveChangesAsync();
@@ -28,8 +28,16 @@ namespace Cloud_API.Helpers.Services
 
         public async Task<Receipt?> GetSingleReceiptAsync(int id)
         {
-            var singleReceipt = await context.Receipts.FindAsync(id);
-            return singleReceipt;
+            try
+            {
+                var singleReceipt = await context.Receipts.FindAsync(id);
+                return singleReceipt;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception during receipt creation: {ex.Message}");
+                throw;
+            }
         }
 
         public async Task<bool> DeleteReceiptAsync(int id)

@@ -6,15 +6,71 @@
 <section class="py-8">
     <div class="max-w-4xl mx-auto bg-white p-8 shadow-md rounded-md md:flex md:flex-wrap">
 
-        <CompanyInfo SelectedCompanyName="@selectedCompanyName"
-                     SelectedAddress="@selectedAddress"
-                     SelectedOrgNr="@selectedOrgNr"
-                     SelectedPhoneNumber="@selectedPhoneNumber"
-                     SelectedSeller="@selectedSeller" />
+        <!-- CompanyInfo -->
+        <div>
+            <h2 class="text-2xl font-semibold mb-4 w-full">Företagsinformation</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
+                <div class="mb-4">
+                    <label class="text-gray-700">Logotyp</label>
+                    <!-- lägg till logga senare -->
+                    <div class="border p-2 w-full bg-gray-200">Placeholder for Logo Upload</div>
+                </div>
+                <div class="mb-4">
+                    <label class="text-gray-700">Företagsnamn</label>
+                    <select class="border p-2 w-full" @bind-value="@SelectedCompanyName" @onchange="HandleCompanyNameChange" @bind-value:event="oninput">
+                        <option value="Default">---</option>
+                        <option value="Valei AB">Valei AB</option>
+                        <!-- Add more options if needed -->
+                    </select>
 
+                </div>
+                <div class="mb-4">
+                    <label class="text-gray-700">Adress</label>
+                    <select class="border p-2 w-full" @bind="SelectedAddress">
+                        <option value="Default">---</option>
+                        <option value="Olaigatan 17 A, 703 61 Örebro">Olaigatan 17 A, 703 61 Örebro</option>
+                        <!-- Lägg till fler options om du vill -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="text-gray-700">Org-nr</label>
+                    <select class="border p-2 w-full" @bind="SelectedOrgNr">
+                        <option value="Default">---</option>
+                        <option value="559037-2164">559037-2164</option>
+                        <!-- Lägg till fler options om du vill -->
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="text-gray-700">Telefon</label>
+                    <select class="border p-2 w-full" @bind="SelectedPhoneNumber">
+                        <option value="Default">---</option>
+                        <option value="019 300 100">019 300 100</option>
+                    </select>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
+                <div class="mb-4">
+                    <label class="text-gray-700">Kassa</label>
+                    <select class="border p-2 w-full">
+                        <option value="kassa1">Kassa 1</option>
+                        <option value="kassa2">Kassa 2</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="text-gray-700">Säljare</label>
+                    <select class="border p-2 w-full" @bind="@SelectedSeller" @onchange="HandleSellerChange" @bind:event="oninput">
+                        <option value="defaultseller">---</option>
+                        <option value="Oskar">Oskar</option>
+                        <option value="Linus">Linus</option>
+                        <option value="Erick">Erick</option>
+                    </select>
+                </div>
+                <h2 class="text-2xl font-semibold mb-4 w-full">Kvittorader</h2>
+            </div>
+        </div>
         <!-- Products -->
         <div class="col-span-2">
-
+     
             <!-- Product List -->
             <div class="col-span-2">
                 @if (products.Any())
@@ -56,54 +112,53 @@
                         Add Product
                     </button>
                 </div>
-
             </div>
-            <!-- Add Button -->
 
-
-        </div>        
-        <!-- Money -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
-            <div class="my-4">
-                <label class="text-gray-700">Totalbelopp</label>
-                <input class="border p-2 w-full" type="text" @bind="totalAmount" readonly /> SEK
-            </div>
-            <div class="my-4">
-                <label class="text-gray-700">Moms</label>
-                <input class="border p-2 w-full" type="text" @bind="tax" readonly /> SEK
-            </div>
-        </div>
-
-        <!-- Betalsätt -->
-        <h2 class="text-2xl font-semibold mb-4 w-full">Betalsätt</h2>
-        <div class="grid grid-cols-2 gap-4 mb-4 w-full">
-            @foreach (var paymentMethod in paymentMethods)
-            {
-                <div class="flex items-center">
-                    <input type="checkbox" id="@paymentMethod.Id" class="mr-2" @bind="paymentMethod.Selected" />
-                    <label for="@paymentMethod.Id">@paymentMethod.Name</label>
+            <!-- Money -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4 w-full">
+                <div class="my-4">
+                    <label class="text-gray-700">Totalbelopp</label>
+                    <input class="border p-2 w-full" type="text" @bind="totalAmount" readonly /> SEK
                 </div>
-            }
-        </div>
+                <div class="my-4">
+                    <label class="text-gray-700">Moms</label>
+                    <input class="border p-2 w-full" type="text" @bind="tax" readonly /> SEK
+                </div>
+            </div>
 
-        <!-- Footer -->
-        <h2 class="text-2xl font-semibold mb-4 w-full">Footer</h2>
-        <div class="mb-4 w-full">
-            <label class="text-gray-700">Optional styling area for text and/or images</label>
-            <textarea class="border p-2 w-full" @bind="footerText"></textarea>
-        </div>
+            <!-- Betalsätt -->
+            <h2 class="text-2xl font-semibold mb-4 w-full">Betalsätt</h2>
+            <div class="grid grid-cols-2 gap-4 mb-4 w-full">
+                @foreach (var paymentMethod in paymentMethods)
+                {
+                    <div class="flex items-center">
+                        <input type="checkbox" id="@paymentMethod.Id" class="mr-2" @bind="paymentMethod.Selected" />
+                        <label for="@paymentMethod.Id">@paymentMethod.Name</label>
+                    </div>
+                }
+            </div>
 
-        <!-- Receipt Number -->
-        <div class="mb-4 w-full">
-            <label class="text-gray-700">Receipt Number</label>
-            <span class="border p-2 w-full">@receiptNumber</span>
-        </div>
+            <!-- Footer -->
+            <h2 class="text-2xl font-semibold mb-4 w-full">Footer</h2>
+            <div class="mb-4 w-full">
+                <label class="text-gray-700">Optional styling area for text and/or images</label>
+                <textarea class="border p-2 w-full" @bind="footerText"></textarea>
+            </div>
 
-        <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="SubmitForm">
-            Submit
-        </button>
+            <!-- Receipt Number -->
+            <div class="mb-4 w-full">
+                <label class="text-gray-700">Receipt Number</label>
+                <span class="border p-2 w-full">@receiptNumber</span>
+            </div>
+            <p>@SelectedCompanyName @SelectedSeller</p>
+            <!-- Submit Button -->
+            <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="SubmitForm">
+                Submit
+            </button>
+        </div>
     </div>
 </section>
+
 
 @code {
     private string totalAmount;
@@ -111,11 +166,56 @@
     private string footerText;
     private int receiptNumber = 1;
 
-    private string selectedCompanyName;
-    private string selectedAddress;
-    private string selectedOrgNr;
-    private string selectedPhoneNumber;
-    private string selectedSeller;
+    // Properties bound by CompanyInfo component
+    private string SelectedCompanyName { get; set; }
+    private string SelectedSeller { get; set; }
+    private string SelectedAddress { get; set; }
+    private string SelectedOrgNr { get; set; }
+    private string SelectedPhoneNumber { get; set; }
+
+    // ... (rest of your existing code)
+
+    private void HandleCompanyNameChange(ChangeEventArgs e)
+    {
+        SelectedCompanyName = e.Value?.ToString();
+        Console.WriteLine($"Selected Company Name: {SelectedCompanyName}");
+
+        if (SelectedCompanyName == "Valei AB")
+        {
+            SelectedAddress = "Olaigatan 17 A, 703 61 Örebro";
+            SelectedOrgNr = "559037-2164";
+            SelectedPhoneNumber = "019 300 100";
+
+            StateHasChanged();
+        }
+        else
+        {
+            SelectedAddress = string.Empty;
+            SelectedOrgNr = string.Empty;
+            SelectedPhoneNumber = string.Empty;
+            StateHasChanged();
+        }
+    }
+
+    private void HandleSellerChange(ChangeEventArgs e)
+    {
+        SelectedSeller = e.Value?.ToString();
+        Console.WriteLine($"Selected Seller: {SelectedSeller}");
+        StateHasChanged();
+    }
+    private async Task UpdateSelectedValuesAsync()
+    {
+        // Simulate an asynchronous operation, such as fetching data from a service
+        // Replace this with your actual logic
+        await Task.Delay(1000);
+
+        // Update SelectedCompanyName and SelectedSeller based on the result
+        SelectedCompanyName = "New Company Name";
+        SelectedSeller = "New Seller";
+
+        // After updating properties, trigger a re-render of the component
+        StateHasChanged();
+    }
 
     // List of Products
     List<ProductModel> products = new List<ProductModel>();
@@ -166,19 +266,15 @@
     // Method to submit the form
     private async Task SubmitForm()
     {
-
         // Create a receipt object with the selected information
         Receipt receipt = new Receipt
-        {
-            Name = selectedSeller,
-            Company = selectedCompanyName,
-            // Add other properties as needed
-        };
+            {
+                Name = SelectedSeller,
+                Company = SelectedCompanyName,
+                // Add other properties as needed
+            };
 
         // Call the CreateReceipt method from the service
         await ReceiptService.CreateReceipt(receipt);
-
-        // Navigate to the created receipt
-        NavigationManager.NavigateTo($"/receipts/{receipt.Id}");
     }
 }
