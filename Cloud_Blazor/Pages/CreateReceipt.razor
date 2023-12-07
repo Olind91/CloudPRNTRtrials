@@ -3,7 +3,14 @@
 @inject IReceiptService ReceiptService
 @inject NavigationManager NavigationManager
 
+<div class="max-w-4xl mx-auto">
+    <h1 class="text-4xl text-white text-center font-extrabold drop-shadow-md mb-16">Create Receipt</h1>
+
+    <ReturnButton NavigateTo="/" />
+</div>
+
 <section class="py-8">
+
     <div class="max-w-4xl mx-auto bg-white p-8 shadow-md rounded-md md:flex md:flex-wrap">
 
         <!-- CompanyInfo -->
@@ -150,7 +157,6 @@
                 <label class="text-gray-700">Receipt Number</label>
                 <span class="border p-2 w-full">@receiptNumber</span>
             </div>
-            <p>@SelectedCompanyName @SelectedSeller</p>
             <!-- Submit Button -->
             <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="SubmitForm">
                 Submit
