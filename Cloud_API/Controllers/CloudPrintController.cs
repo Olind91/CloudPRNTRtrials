@@ -76,9 +76,11 @@ public class CloudPRNTController : ControllerBase
         return Ok(jsonResponse);
     }
 
-    [HttpGet("printjob")]
-    public async Task<IActionResult> GetPrintJob([FromQuery] string printerMAC, [FromQuery] string mediaType)
+    [HttpGet("poll")]
+    public async Task<IActionResult> GetPrintJob([FromQuery] string mediaType)
     {
+        // Retrieve the printerMAC from the request headers
+        string printerMAC = Request.Headers["Printer-MAC"].FirstOrDefault() ?? "00:11:62:1e:a4:e1";
 
         // Check if the provided printerMAC matches the hard-coded MAC address
         if (printerMAC != "00:11:62:1e:a4:e1")
@@ -107,7 +109,6 @@ public class CloudPRNTController : ControllerBase
 
             // Return the file content
             return File(printJobData, mediaType);
-
         }
 
         // Return a response indicating that no print jobs are available
