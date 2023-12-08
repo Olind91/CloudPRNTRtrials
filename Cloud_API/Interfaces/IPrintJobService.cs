@@ -11,5 +11,8 @@ namespace Cloud_API.Interfaces
         void RemovePrintJob(string jobId);
         bool TryGetPrintJob(string jobId, out PrintJob jobData);
         Task<PrintJob> UpdateJobStatus(int jobId, PrintJobStatus status);
+        Task<PrintJob?> GetSinglePrintJobAsync(int id);
+
+
     }
 }

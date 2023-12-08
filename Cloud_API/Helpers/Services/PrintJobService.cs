@@ -62,10 +62,22 @@ namespace Cloud_API.Helpers.Services
             }
         }
 
+
+
         public bool TryGetPrintJob(string jobId, out PrintJob jobData)
         {
             return _printJobRepository.TryGetPrintJob(jobId, out jobData);
         }
+
+        public async Task<PrintJob?> GetSinglePrintJobAsync(int id)
+        {
+            var singlePrintjob = await _printJobRepository.GetPrintJobByIdAsync(id);
+            if (singlePrintjob == null)
+                return null;
+
+            return singlePrintjob;
+        }
+
 
 
         public async Task<PrintJob> UpdateJobStatus(int jobId, PrintJobStatus status)
@@ -83,5 +95,9 @@ namespace Cloud_API.Helpers.Services
         }
 
 
+
+
+
+      
     }
 }

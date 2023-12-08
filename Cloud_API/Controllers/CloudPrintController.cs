@@ -1,17 +1,10 @@
-﻿using Cloud_API.Helpers.Repositories;
-using Cloud_API.Interfaces;
+﻿using Cloud_API.Interfaces;
 using Cloud_API.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
-using StarMicronics.CloudPrnt;
-using StarMicronics.CloudPrnt.CpMessage;
-using System;
 using System.Net;
 using System.Text;
-using System.Threading.Tasks;
-using static System.Net.Mime.MediaTypeNames;
+
 
 [ApiController]
 [Route("api/cloudprnt")]
@@ -44,77 +37,143 @@ public class CloudPRNTController : ControllerBase
         receipt.AppendLine("<text>Item 1       $10.00</text>");
         receipt.AppendLine("<text>Item 2       $15.00</text>");
         receipt.AppendLine("<text>Total        $25.00</text>");
-        receipt.AppendLine("<cut/>"); 
+        receipt.AppendLine("<cut/>");
 
         return receipt.ToString();
     }
 
-    [HttpPost("poll")]
+    [HttpPost]
     public IActionResult HandleCloudPRNTPoll([FromBody] PollRequest pollRequest)
     {
-        Console.WriteLine(JsonConvert.SerializeObject(pollRequest));
+        // Log the incoming request details
         Console.WriteLine($"Received CloudPRNT request from {pollRequest.printerMAC}, status: {pollRequest.statusCode}");
+        Console.WriteLine(JsonConvert.SerializeObject(pollRequest));
 
         // Create a response object
         PollResponse pollResponse = new PollResponse();
 
+        // Check if there is a print job available for the specified printer
         if (_printJobService.IsJobAvailable(pollRequest.printerMAC))
         {
-            pollResponse.jobReady = true;
-            pollResponse.mediaTypes = new List<string> { "text/vnd.star.markup" };
-            pollResponse.deleteMethod = "DELETE";// Set the deleteMethod property
+            // Get the first pending print job for the printer
+            var pendingJob = _printJobService.FindJobFromMac(pollRequest.printerMAC).Result;
+
+            if (pendingJob != null)
+            {
+                // Indicate that a job is ready and specify the supported media types
+                pollResponse.jobReady = true;
+                pollResponse.mediaTypes = new List<string> { "text/plain" };
+
+                // Set the jobToken in the response using the ID of the pending job
+                pollResponse.jobToken = pendingJob.Id.ToString();
+                pollResponse.jobGetUrl = "https://192.168.1.157:45455/api/cloudprnt/";
+            }
+            else
+            {
+                // Indicate that no job is ready
+                pollResponse.jobReady = false;
+                pollResponse.mediaTypes = null;
+            }
         }
         else
         {
+            // Indicate that no job is ready
             pollResponse.jobReady = false;
             pollResponse.mediaTypes = null;
-            pollResponse.deleteMethod = "GET"; // Set the deleteMethod property
         }
 
-        string jsonResponse = JsonConvert.SerializeObject(pollResponse);
+        // Log the generated response details
         Console.WriteLine(JsonConvert.SerializeObject(pollResponse));
+
+        // Serialize the response object to JSON
+        string jsonResponse = JsonConvert.SerializeObject(pollResponse);
+
+        // Return the JSON response
         return Ok(jsonResponse);
     }
 
-    [HttpGet("poll")]
-    public async Task<IActionResult> GetPrintJob([FromQuery] string mediaType)
+    [HttpGet]
+    public async Task<IActionResult> GetPrintJob(int jobToken)
     {
-        // Retrieve the printerMAC from the request headers
-        string printerMAC = Request.Headers["Printer-MAC"].FirstOrDefault() ?? "00:11:62:1e:a4:e1";
-
-        // Check if the provided printerMAC matches the hard-coded MAC address
-        if (printerMAC != "00:11:62:1e:a4:e1")
+        try
         {
-            // Return a response indicating that the printer is not authorized
-            return Unauthorized("Unauthorized printer");
+            // Log to check if the method is reached
+            Console.WriteLine("GetPrintJob method reached");
+
+            // Retrieve the printerMAC from the request headers
+            string printerMAC = Request.Headers["Printer-MAC"].FirstOrDefault() ?? "00:11:62:1e:a4:e1";
+
+            // Log the retrieved printerMAC
+            Console.WriteLine($"Printer MAC: {printerMAC}");
+
+            // Check if the provided printerMAC matches the hard-coded MAC address
+            if (printerMAC != "00:11:62:1e:a4:e1")
+            {
+                // Log the unauthorized message
+                Console.WriteLine("Unauthorized printer");
+
+                // Return a response indicating that the printer is not authorized
+                return Unauthorized("Unauthorized printer");
+            }
+
+            // Log to check if the authorization check passed
+            Console.WriteLine("Authorization check passed");
+
+            // Check if there is a print job with the specified jobToken
+            var printJobTask = _printJobService.GetSinglePrintJobAsync(jobToken);
+            var printJob = await printJobTask;
+
+            // Log the job details
+            Console.WriteLine($"Print job: {(printJob != null ? printJob.Id.ToString() : "null")}, {printJob?.Content}");
+
+            if (printJob != null && printJob.PrinterMAC == printerMAC)
+            {
+                // Set the print job status to "InProgress" in the service
+                _printJobService.UpdateJobStatus(printJob.Id, PrintJobStatus.InProgress);
+
+                // Log the success message
+                Console.WriteLine("Print job found");
+
+                // Return the plain text content with OK status
+                return Ok(printJob.Content);
+            }
+
+            // Log the failure message
+            Console.WriteLine("Print job not found");
+
+            // Return a response indicating that no matching print job is available
+            return NotFound("Print job not found");
         }
-
-        // Check if there are any pending print jobs for the specific printer
-        if (_printJobService.IsJobAvailable(printerMAC))
+        catch (Exception ex)
         {
-            // Get the first pending print job
-            var printJob = await _printJobService.FindJobFromMac(printerMAC);
+            // Log any exceptions that occur
+            Console.WriteLine($"Exception: {ex.Message}");
+            return StatusCode(500, "Internal Server Error");
+        }
+    }
 
+
+    /*
+     [HttpGet]
+    public async Task<IActionResult> GetPrintJob(int jobToken)
+    {
+        // ... (din befintliga kod)
+
+        if (printJob != null && printJob.PrinterMAC == printerMAC)
+        {
             // Set the print job status to "InProgress" in the service
             await _printJobService.UpdateJobStatus(printJob.Id, PrintJobStatus.InProgress);
 
-            // Provide the print job content in the specified media type from the service
-            byte[] printJobData = Encoding.UTF8.GetBytes(printJob.Content);
-
-            // Set the response content type based on the requested media type
-            Response.Headers.Add("Content-Type", mediaType);
-
-            // Set the response status
-            Response.StatusCode = (int)HttpStatusCode.OK;
-
-            // Return the file content
-            return File(printJobData, mediaType);
+            // Return the print job content with OK status and correct content type
+            // In this example, assuming 'text/plain' as the content type, adjust as needed
+            return Content(printJob.Content, "text/plain");
         }
 
-        // Return a response indicating that no print jobs are available
-        return NotFound("No print jobs available");
+        // Return a response indicating that no matching print job is available
+        return NotFound("Print job not found");
     }
 
+     */
 
 
 }
