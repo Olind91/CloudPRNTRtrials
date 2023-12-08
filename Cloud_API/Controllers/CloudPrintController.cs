@@ -93,7 +93,7 @@ public class CloudPRNTController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPrintJob(int jobToken)
+    public async Task<IActionResult> GetPrintJob(string jobToken)
     {
         try
         {
@@ -119,8 +119,16 @@ public class CloudPRNTController : ControllerBase
             // Log to check if the authorization check passed
             Console.WriteLine("Authorization check passed");
 
-            // Check if there is a print job with the specified jobToken
-            var printJobTask = _printJobService.GetSinglePrintJobAsync(jobToken);
+            // Try to parse the jobToken as an integer
+            if (!int.TryParse(jobToken, out int jobId))
+            {
+                // Log an error if parsing fails
+                Console.WriteLine("Invalid jobToken format");
+                return BadRequest("Invalid jobToken format");
+            }
+
+            // Check if there is a print job with the specified jobId
+            var printJobTask = _printJobService.GetSinglePrintJobAsync(jobId);
             var printJob = await printJobTask;
 
             // Log the job details
