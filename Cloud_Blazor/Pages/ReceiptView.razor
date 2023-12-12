@@ -1,0 +1,60 @@
+﻿@page "/receipts/{id}"
+@inject IReceiptService ReceiptService
+@inject NavigationManager NavigationManager
+
+<section class="py-8">
+    <div class="max-w-2xl mx-auto">
+
+        <h1 class="text-4xl text-white text-center font-extrabold drop-shadow-md mb-16">Receipt View</h1>
+        <ReturnButton NavigateTo="/receipts" />
+
+
+
+        @if (Receipt != null)
+        {
+            <div class="bg-gray-200 p-8 shadow-md rounded-md mx-auto max-w-2xl">
+                <h3 class="text-xl font-semibold mb-4">Receipt @Receipt.Id</h3>
+                <p class="text-gray-700">Name: @Receipt.Name</p>
+                <p class="text-gray-700">Company: @Receipt.Company</p>
+                <DeleteButton Receipt="@Receipt" OnDelete="HandleDeleteReceipt" />
+                <!-- Add other receipt details here -->
+            </div>
+        }
+        else
+        {
+            <p class="text-gray-700">Receipt not found</p>
+        }
+
+    </div>
+</section>
+
+@code {
+    [Parameter]
+    public string Id { get; set; }
+
+    private Receipt Receipt { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (int.TryParse(Id, out var receiptId))
+        {
+            Receipt = await ReceiptService.GetReceiptById(receiptId);
+        }
+        else
+        {
+            NavigationManager.NavigateTo("/receipts");
+        }
+    }
+
+    private async Task HandleDeleteReceipt()
+    {
+        if (Receipt != null)
+        {
+            await ReceiptService.DeleteReceipt(Receipt.Id);
+
+            // Navigate back to the "Receipts" page after deleting the receipt
+            NavigationManager.NavigateTo("/Receipts");
+        }
+    }
+}
+

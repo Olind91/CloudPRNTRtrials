@@ -8,6 +8,8 @@ namespace Cloud_API.Interfaces
 
         Task<Receipt?> GetSingleReceiptAsync(int id);
 
-        Task<Receipt>? CreateReceiptAsync(Receipt receipts);
+        Task<Receipt?> CreateReceiptAsync(Receipt receipts);
+
+        Task<bool> DeleteReceiptAsync(int id);
     }
 }
