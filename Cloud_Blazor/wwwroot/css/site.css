@@ -930,3 +930,10 @@ video {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 }
+
+@keyframes fadeInUp {
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}

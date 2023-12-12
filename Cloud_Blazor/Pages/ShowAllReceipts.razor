@@ -2,9 +2,16 @@
 @inject IReceiptService ReceiptService
 @inject NavigationManager NavigationManager
 
+<style>
+    .fade-in {
+        opacity: 0;
+        transform: scale(0.5);
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+</style>
+
 <section class="py-8">
     <div class="max-w-4xl mx-auto">
-
         <h1 class="text-4xl text-white text-center font-extrabold drop-shadow-md mb-16">Receipts</h1>
 
         <ReturnButton NavigateTo="/" />
@@ -18,7 +25,7 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 @foreach (var receipt in ReceiptService.Receipts)
                 {
-                    <div class="bg-white p-4 shadow-md rounded-md">
+                    <div class="bg-white p-4 shadow-md rounded-md fade-in">
                         <h3 class="text-lg font-semibold mb-2">Receipt @receipt.Id</h3>
                         <p class="text-gray-700">Name: @receipt.Name</p>
                         <p class="text-gray-700">Company: @receipt.Company</p>
@@ -39,31 +46,30 @@
     private List<Receipt>? receipts;
     private bool IsLoading = true;
     private string[] loadingMessages = {
-    "Tickling servers to fetch receipts...",
-    "Waking up the data fairies...",
-    "Assembling virtual receipts...",
-    "Transmitting quantum data...",
-    "Summoning magical receipts...",
-    "Sprinkling magic loading dust...",
-    "Synchronizing with parallel universes...",
-    "Fetching intergalactic receipts...",
-    "Waking up the code gremlins...",
-    "Unleashing the receipt ninjas...",
-    "Digging into the data mine...",
-    "Receiving coded messages from the matrix...",
-    "Playing hide-and-seek with the receipts..."    
+        "Tickling servers to fetch receipts...",
+        "Waking up the data fairies...",
+        "Assembling virtual receipts...",
+        "Transmitting quantum data...",
+        "Summoning magical receipts...",
+        "Sprinkling magic loading dust...",
+        "Synchronizing with parallel universes...",
+        "Fetching intergalactic receipts...",
+        "Waking up the code gremlins...",
+        "Unleashing the receipt ninjas...",
+        "Digging into the data mine...",
+        "Receiving coded messages from the matrix...",
+        "Playing hide-and-seek with the receipts..."
     };
     private string loadingMessage;
     private string[] dataVoidMessages = {
-    "No data, but plenty of imagination!",
-    "No data to get, no receipts to see",
-    "Data is on a coffee break. ☕ Be back soon!",
-    "Not a single receipt in sight, just cosmic fluff",
-    "Zero receipts, but infinite possibilities!",
-    "Data ghosts are playing hide and seek",
-    "A blank slate just waiting to get filled",
-    "Nothing to see here, but thanks for coming"
-
+        "No data, but plenty of imagination!",
+        "No data to get, no receipts to see",
+        "Data is on a coffee break. ☕ Be back soon!",
+        "Not a single receipt in sight, just cosmic fluff",
+        "Zero receipts, but infinite possibilities!",
+        "Data ghosts are playing hide and seek",
+        "A blank slate just waiting to get filled",
+        "Nothing to see here, but thanks for coming"
     };
     private string dataVoidMessage;
 
@@ -89,4 +95,5 @@
     {
         NavigationManager.NavigateTo($"/receipts/{id}");
     }
+
 }
