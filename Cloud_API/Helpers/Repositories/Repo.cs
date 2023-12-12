@@ -54,6 +54,12 @@ namespace Cloud_API.Helpers.Repositories
 
         #endregion
 
-
-    } 
+        #region Delete
+        public void Delete(TEntity entity)
+        {
+            _context.Set<TEntity>().Remove(entity);
+            _context.SaveChanges();
+        }
+        #endregion
+    }
 }
