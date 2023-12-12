@@ -14,7 +14,6 @@ namespace Cloud_API.Helpers.Services
             context = _context;
         }
 
-
         public async Task<Receipt?> CreateReceiptAsync(Receipt receipt)
         {
             context.Receipts.Add(receipt);
@@ -22,34 +21,39 @@ namespace Cloud_API.Helpers.Services
             return receipt;
         }
 
-
-
         public async Task<List<Receipt>> GetAllReceiptsAsync()
         {
-            var receipts = await context.Receipts.ToListAsync();
-            return receipts;
+            return await context.Receipts.ToListAsync();
         }
 
         public async Task<Receipt?> GetSingleReceiptAsync(int id)
         {
-            var singleReceipt = await context.Receipts.FindAsync(id);
-            if (singleReceipt == null)
-                return null;
-
-            return singleReceipt;
+            try
+            {
+                var singleReceipt = await context.Receipts.FindAsync(id);
+                return singleReceipt;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Exception during receipt creation: {ex.Message}");
+                throw;
+            }
         }
+
         public async Task<bool> DeleteReceiptAsync(int id)
         {
             var receiptToDelete = await context.Receipts.FindAsync(id);
+
             if (receiptToDelete == null)
+            {
                 return false;
+            }
 
             context.Receipts.Remove(receiptToDelete);
             await context.SaveChangesAsync();
 
             return true;
         }
-
     }
 }
 

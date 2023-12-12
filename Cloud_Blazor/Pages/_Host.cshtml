@@ -12,8 +12,13 @@
     <link href="css/site.css" rel="stylesheet" />
     <component type="typeof(HeadOutlet)" render-mode="ServerPrerendered" />
 </head>
-<body class="h-screen bg-gradient-to-t from-blue-100 to-blue-300">
-    <component type="typeof(App)" render-mode="ServerPrerendered" />
+<body class="bg-gray-100">
+    <div class="fixed inset-0 bg-gradient-to-t from-blue-100 to-blue-300"></div>
+    <div class="relative">
+        <div class="pt-16">
+            <component type="typeof(App)" render-mode="ServerPrerendered" />
+        </div>
+    </div>
 
     <script src="_framework/blazor.server.js"></script>
 </body>

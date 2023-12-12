@@ -1,89 +1,99 @@
 ﻿@page "/Receipts"
+@inject IReceiptService ReceiptService
+@inject NavigationManager NavigationManager
 
-@inject HttpClient TestingRestAPI
+<style>
+    .fade-in {
+        opacity: 0;
+        transform: scale(0.5);
+        animation: fadeInUp 0.5s ease-out forwards;
+    }
+</style>
 
-<section class="bg-gray-100 min-h-screen py-8">
+<section class="py-8">
     <div class="max-w-4xl mx-auto">
+        <h1 class="text-4xl text-white text-center font-extrabold drop-shadow-md mb-16">Receipts</h1>
 
-        <h2 class="text-2xl font-semibold mb-4">Receipts</h2>
+        <ReturnButton NavigateTo="/" />
 
-        @if (receipts != null && receipts.Any())
+        @if (IsLoading)
+        {
+            <p class="text-gray-700">@loadingMessage</p>
+        }
+        else if (ReceiptService.Receipts != null && ReceiptService.Receipts.Any())
         {
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                @foreach (var receipt in receipts)
+                @foreach (var receipt in ReceiptService.Receipts)
                 {
-                    <div class="bg-white p-4 shadow-md rounded-md">
+                    <div class="bg-white p-4 shadow-md rounded-md fade-in">
                         <h3 class="text-lg font-semibold mb-2">Receipt @receipt.Id</h3>
                         <p class="text-gray-700">Name: @receipt.Name</p>
                         <p class="text-gray-700">Company: @receipt.Company</p>
-                        <button class="bg-red-500 text-white font-bold py-1 px-2 rounded mt-2" @onclick="() => DeleteReceipt(receipt.Id)">Delete</button>
+                        <DeleteButton Receipt="receipt" OnDelete="HandleDeleteReceipt" />
+                        <button class="bg-blue-500 text-white font-bold py-1 px-2 rounded mt-2" @onclick="() => ViewReceipt(receipt.Id)">View</button>
                     </div>
                 }
             </div>
         }
         else
         {
-            <p class="text-gray-700">No data available</p>
+            <p class="text-gray-700">@dataVoidMessage</p>
         }
-
     </div>
 </section>
 
 @code {
     private List<Receipt>? receipts;
+    private bool IsLoading = true;
+    private string[] loadingMessages = {
+        "Tickling servers to fetch receipts...",
+        "Waking up the data fairies...",
+        "Assembling virtual receipts...",
+        "Transmitting quantum data...",
+        "Summoning magical receipts...",
+        "Sprinkling magic loading dust...",
+        "Synchronizing with parallel universes...",
+        "Fetching intergalactic receipts...",
+        "Waking up the code gremlins...",
+        "Unleashing the receipt ninjas...",
+        "Digging into the data mine...",
+        "Receiving coded messages from the matrix...",
+        "Playing hide-and-seek with the receipts..."
+    };
+    private string loadingMessage;
+    private string[] dataVoidMessages = {
+        "No data, but plenty of imagination!",
+        "No data to get, no receipts to see",
+        "Data is on a coffee break. ☕ Be back soon!",
+        "Not a single receipt in sight, just cosmic fluff",
+        "Zero receipts, but infinite possibilities!",
+        "Data ghosts are playing hide and seek",
+        "A blank slate just waiting to get filled",
+        "Nothing to see here, but thanks for coming"
+    };
+    private string dataVoidMessage;
 
     protected override async Task OnInitializedAsync()
     {
-        await LoadReceipts();
+        // Randomly select a message from the array
+        var random = new Random();
+        loadingMessage = loadingMessages[random.Next(loadingMessages.Length)];
+        dataVoidMessage = dataVoidMessages[random.Next(dataVoidMessages.Length)];
+
+        await ReceiptService.GetReceipts();
+
+        // After data is loaded, set the loading state to false
+        IsLoading = false;
     }
 
-    private async Task LoadReceipts()
+    private async Task HandleDeleteReceipt(Receipt receipt)
     {
-        try
-        {
-            // Use GetFromJsonAsync to deserialize JSON into objects
-            receipts = await TestingRestAPI.GetFromJsonAsync<List<Receipt>>("https://localhost:7029/api/Receipt");
-
-            if (receipts == null || !receipts.Any())
-            {
-                receipts = null;
-            }
-        }
-        catch (HttpRequestException ex)
-        {
-            Console.WriteLine($"HttpRequestException: {ex.Message}");
-
-            if (ex.InnerException != null)
-            {
-                Console.WriteLine($"Inner Exception: {ex.InnerException.Message}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-        }
+        await ReceiptService.DeleteReceipt(receipt.Id);
     }
 
-    private async Task DeleteReceipt(int receiptId)
+    async Task ViewReceipt(int id)
     {
-        try
-        {
-            // Make a DELETE request to the API to delete the receipt
-            var response = await TestingRestAPI.DeleteAsync($"https://localhost:7029/api/Receipt/{receiptId}");
-            if (response.IsSuccessStatusCode)
-            {
-                // Reload the receipts after deletion
-                await LoadReceipts();
-            }
-            else
-            {
-                // Handle error if needed
-                Console.WriteLine($"Error deleting receipt. Status code: {response.StatusCode}");
-            }
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"Exception: {ex.Message}");
-        }
+        NavigationManager.NavigateTo($"/receipts/{id}");
     }
+
 }
