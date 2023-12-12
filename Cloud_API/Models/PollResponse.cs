@@ -10,7 +10,7 @@
         public List<string>? claimBarcodeReader { get; set; }
         public List<string>? claimKeyboard { get; set; }
         public List<Display>? display { get; set; }
-        public string? jobGetUrl { get; set; } = "https://192.168.1.157:45457/api/cloudprnt/";
+        public string? jobGetUrl { get; set; } = "https://192.168.1.159:45455/api/cloudprnt/";
         public string? jobConfirmationUrl { get; set; }
     }
 

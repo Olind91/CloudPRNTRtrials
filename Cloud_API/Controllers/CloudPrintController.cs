@@ -17,31 +17,33 @@ public class CloudPRNTController : ControllerBase
         _printJobService = printJobService;
     }
 
+    #region CREATE RECIEPT & PRINTJOB
     [HttpPost("job")]
-    public async Task<IActionResult> CreatePrintJob()
+    public async Task<IActionResult> CreatePrintJob([FromBody] PrintJob printJob)
     {
-        // Generate receipt content
-        string receiptContent = GenerateReceiptContent();
+        if (printJob == null)
+        {
+            return BadRequest("Invalid PrintJob object in the request.");
+        }
 
-        // Create a new print job with the generated receipt content
+        // Extract content from the PrintJob object
+        string receiptContent = printJob?.Content;
+
+        // Validate that content is not null or empty
+        if (string.IsNullOrWhiteSpace(receiptContent))
+        {
+            return BadRequest("Invalid or empty Content field in the PrintJob object.");
+        }
+
+        // Create a new print job with the extracted receipt content
         var printJobId = await _printJobService.CreatePrintJobAsync(receiptContent);
 
         return Ok(printJobId); // Return the print job ID to the client
     }
+    #endregion
 
-    private string GenerateReceiptContent()
-    {
-        // Simple example: Generate a receipt with a header, items, and a total
-        StringBuilder receipt = new StringBuilder();
-        receipt.AppendLine("<text>----- Receipt -----</text>");
-        receipt.AppendLine("<text>Item 1       $10.00</text>");
-        receipt.AppendLine("<text>Item 2       $15.00</text>");
-        receipt.AppendLine("<text>Total        $25.00</text>");
-        receipt.AppendLine("<cut/>");
 
-        return receipt.ToString();
-    }
-
+    #region POST-REQUEST/RESPONSE
     [HttpPost]
     public IActionResult HandleCloudPRNTPoll([FromBody] PollRequest pollRequest)
     {
@@ -66,7 +68,7 @@ public class CloudPRNTController : ControllerBase
 
                 // Set the jobToken in the response using the ID of the pending job
                 pollResponse.jobToken = pendingJob.Id.ToString();
-                pollResponse.jobGetUrl = "https://192.168.1.157:45457/api/cloudprnt/";
+                pollResponse.jobGetUrl = "https://192.168.1.159:45455/api/cloudprnt/";
             }
             else
             {
@@ -91,7 +93,10 @@ public class CloudPRNTController : ControllerBase
         // Return the JSON response
         return Ok(jsonResponse);
     }
+    #endregion
 
+
+    #region GET-RESPONSE
     [HttpGet]
     public async Task<IActionResult> GetPrintJob([FromQuery] string? status, [FromQuery] string? printerMAC, [FromQuery] string? statusCode, [FromQuery] string token)
     {
@@ -168,29 +173,10 @@ public class CloudPRNTController : ControllerBase
             return StatusCode(500, "Internal Server Error");
         }
     }
+    #endregion
 
 
-    /*
-     [HttpGet]
-    public async Task<IActionResult> GetPrintJob(int jobToken)
-    {
-        // ... (din befintliga kod)
-
-        if (printJob != null && printJob.PrinterMAC == printerMAC)
-        {
-            // Set the print job status to "InProgress" in the service
-            await _printJobService.UpdateJobStatus(printJob.Id, PrintJobStatus.InProgress);
-
-            // Return the print job content with OK status and correct content type
-            // In this example, assuming 'text/plain' as the content type, adjust as needed
-            return Content(printJob.Content, "text/plain");
-        }
-
-        // Return a response indicating that no matching print job is available
-        return NotFound("Print job not found");
-    }
-
-     */
+    
 
 
 }
