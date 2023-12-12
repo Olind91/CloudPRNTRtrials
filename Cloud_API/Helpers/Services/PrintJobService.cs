@@ -7,7 +7,7 @@ namespace Cloud_API.Helpers.Services
 {
     public class PrintJobService : IPrintJobService
     {
-        private const string HardCodedPrinterMAC = "00:11:62:1E:A4:E1"; //For now
+        private const string HardCodedPrinterMAC = "00:11:62:1e:a4:e1"; //For now
 
         private readonly PrintJobRepository _printJobRepository;
 
@@ -25,6 +25,13 @@ namespace Cloud_API.Helpers.Services
             };
 
             return await _printJobRepository.AddAsync(printJob);
+        }
+
+        public async Task<PrintJob> FindJobFromMac(string printerMAC)
+        {
+            var pendingJob = await _printJobRepository.GetFirstPendingJobForPrinter(printerMAC);
+
+            return pendingJob;
         }
 
         public async Task<IEnumerable<PrintJob>> GetRecentPrintJobsAsync(int count)
@@ -55,14 +62,42 @@ namespace Cloud_API.Helpers.Services
             }
         }
 
+
+
         public bool TryGetPrintJob(string jobId, out PrintJob jobData)
         {
             return _printJobRepository.TryGetPrintJob(jobId, out jobData);
         }
 
-        public bool TryGetPrintJob(string jobId, out object jobData)
+        public async Task<PrintJob?> GetSinglePrintJobAsync(int id)
         {
-            throw new NotImplementedException();
+            var singlePrintjob = await _printJobRepository.GetPrintJobByIdAsync(id);
+            if (singlePrintjob == null)
+                return null;
+
+            return singlePrintjob;
         }
+
+
+
+        public async Task<PrintJob> UpdateJobStatus(int jobId, PrintJobStatus status)
+        {
+            var job = await _printJobRepository.GetPrintJobByIdAsync(jobId);
+
+            if (job != null)
+            {
+                job.Status = status;
+                await _printJobRepository.UpdateAsync(job);
+                return job;  // Return the updated job
+            }
+
+            return null;
+        }
+
+
+
+
+
+      
     }
 }
