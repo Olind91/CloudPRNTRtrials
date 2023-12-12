@@ -66,7 +66,7 @@ public class CloudPRNTController : ControllerBase
 
                 // Set the jobToken in the response using the ID of the pending job
                 pollResponse.jobToken = pendingJob.Id.ToString();
-                pollResponse.jobGetUrl = "https://192.168.1.157:45455/api/cloudprnt/";
+                pollResponse.jobGetUrl = "https://192.168.1.157:45457/api/cloudprnt/";
             }
             else
             {
@@ -93,12 +93,13 @@ public class CloudPRNTController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetPrintJob([FromQuery] string? status, [FromQuery] string? printerMAC, [FromQuery] string? statusCode, [FromQuery] string jobToken)
+    public async Task<IActionResult> GetPrintJob([FromQuery] string? status, [FromQuery] string? printerMAC, [FromQuery] string? statusCode, [FromQuery] string token)
     {
         try
         {
             // Log to check if the method is reached
             Console.WriteLine("GetPrintJob method reached");
+           
 
             // Retrieve the printerMAC from the request headers
             string headerPrinterMAC = Request.Headers["Printer-MAC"].FirstOrDefault() ?? "00:11:62:1e:a4:e1";
@@ -120,7 +121,7 @@ public class CloudPRNTController : ControllerBase
             Console.WriteLine("Authorization check passed");
 
             // Parse the jobToken from the JSON
-            if (string.IsNullOrEmpty(jobToken))
+            if (string.IsNullOrEmpty(token))
             {
                 // Log an error if jobToken is missing
                 Console.WriteLine("Missing jobToken in the request");
@@ -128,7 +129,7 @@ public class CloudPRNTController : ControllerBase
             }
 
             // Convert jobToken to integer
-            if (!int.TryParse(jobToken, out int jobId))
+            if (!int.TryParse(token, out int jobId))
             {
                 // Log an error if parsing fails
                 Console.WriteLine("Invalid jobToken format");
@@ -145,7 +146,7 @@ public class CloudPRNTController : ControllerBase
             if (printJob != null && printJob.PrinterMAC == headerPrinterMAC)
             {
                 // Set the print job status to "InProgress" in the service
-                _printJobService.UpdateJobStatus(printJob.Id, PrintJobStatus.InProgress);
+                await _printJobService.UpdateJobStatus(printJob.Id, PrintJobStatus.InProgress);
 
                 // Log the success message
                 Console.WriteLine("Print job found");
