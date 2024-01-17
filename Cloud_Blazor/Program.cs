@@ -13,7 +13,8 @@ builder.Services.AddHttpClient("TestingRestAPI", client =>
     client.BaseAddress = new Uri("https://localhost:7029/");
 });
 
-builder.Services.AddScoped<IReceiptService, ReceiptService>();
+builder.Services.AddScoped<IReceiptService, ReceiptService >();
+builder.Services.AddScoped<IPrintJobService, PrintJobService>();
 
 var app = builder.Build();
 

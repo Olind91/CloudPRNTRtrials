@@ -1,5 +1,6 @@
 ﻿<!-- CreateReceipt.razor -->
 @page "/createReceipt"
+@inject IPrintJobService PrintJobService
 @inject IReceiptService ReceiptService
 @inject NavigationManager NavigationManager
 
@@ -156,11 +157,6 @@
                 <textarea class="border p-2 w-full" @bind="footerText"></textarea>
             </div>
 
-            <!-- Receipt Number -->
-            <div class="mb-4 w-full">
-                <label class="text-gray-700">Receipt Number</label>
-                <span class="border p-2 w-full">@receiptNumber</span>
-            </div>
             <!-- Submit Button -->
             <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded" @onclick="SubmitForm">
                 Submit
@@ -174,7 +170,6 @@
     private string totalAmount;
     private string tax;
     private string footerText;
-    private int receiptNumber = 1;
 
     // Properties bound by CompanyInfo component
     private string SelectedCompanyName { get; set; }
@@ -269,12 +264,64 @@
             total += product.Pris * product.Antal;
         }
 
-        totalAmount = total.ToString("C");
-        tax = (total * 0.25m).ToString("C");
+        totalAmount = total.ToString("");
+        tax = (total * 0.25m).ToString("");
     }
 
-    // Method to submit the form
     private async Task SubmitForm()
+    {
+        // Get the current date and time
+        DateTime currentDateTime = DateTime.Now;
+
+        // Create a receipt object with the selected information
+        PrintJob printjob = new PrintJob
+            {
+                Content = 
+                          "<div style='text-align: center;'>\n" + // Center-align the content
+                          "----- Företagsinformation -----\n" +
+                          $"Företagsnamn: {SelectedCompanyName}\n" +
+                          $"Adress: {SelectedAddress}\n" +
+                          $"Org-nr: {SelectedOrgNr}\n" +
+                          $"Telefon: {SelectedPhoneNumber}\n" +
+                          "</div>\n\n" +
+                          $"----- Seller Information -----\n" +
+                          $"----- Date/Time: {currentDateTime.ToString("yyyy-MM-dd HH:mm:ss")} -----\n" +
+                          $"Seller Name: {SelectedSeller}\n\n" +
+                          $"----- Products -----\n",
+                // Add other properties as needed
+            };
+
+        // Add product details to the content
+        foreach (var product in products)
+        {
+            printjob.Content += $"\nArtikelnummer: {product.Artikelnummer}\nProduktbeskrivning: {product.Produktbeskrivning}\nPris: {product.Pris} SEK\t\t Antal: {product.Antal}";
+        }
+
+        // Add the selected payment methods
+        printjob.Content += $"\n\n----- Selected Payment Methods -----\n";
+        foreach (var paymentMethod in paymentMethods.Where(pm => pm.Selected))
+        {
+            printjob.Content += $"{paymentMethod.Name}\n";
+        }
+
+        // Add the total amount at the bottom
+        printjob.Content += $"\n\nTotalBelopp: {totalAmount} SEK";
+        
+        Receipt receipt = new Receipt
+            {
+                Name = SelectedSeller,
+                Company = SelectedCompanyName,
+                // Add other properties as needed
+            };
+
+        // Call the CreateReceipt method from the service
+        await PrintJobService.CreatePrintJob(printjob);
+        await ReceiptService.CreateReceipt(receipt);
+
+
+    }
+    // Method to submit the form
+    /*private async Task SubmitForm()
     {
         // Create a receipt object with the selected information
         Receipt receipt = new Receipt
@@ -287,4 +334,5 @@
         // Call the CreateReceipt method from the service
         await ReceiptService.CreateReceipt(receipt);
     }
+    */
 }
